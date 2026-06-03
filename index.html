@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hello Nancy · Miami Swim Week Recap</title>
+<!--
+  Miami Swim Week Recap deck — v1.0
+  Style: Carenbloom dark/teal deck system, tuned for ADHD-friendly scanning.
+  One idea per slide · big type · color-coded sections · minimal text.
+  Nav: ← → arrows / Space / click zones / dots / Home-End.
+  Image drop zones are labeled with the exact Shade folder to pull from.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0d0d10;
+    --bg-soft:#15151b;
+    --card:#1a1a22;
+    --card-2:#20202a;
+    --line:#2a2a36;
+    --text:#ffffff;
+    --muted:#9a9aa8;
+    --teal:#00ddc9;      /* brand accent */
+    --green:#3ddc97;     /* GREAT */
+    --amber:#ffb547;     /* COULD BE BETTER */
+    --red:#ff5d6c;       /* NEVER AGAIN */
+    --pink:#ff77c8;      /* Hello Nancy warmth */
+    --accent:var(--teal);
+    --maxw:1180px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- Persistent chrome ---------- */
+  .topbar{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 34px;pointer-events:none;
+  }
+  .brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:.06em;font-size:14px}
+  .brand .dot{width:11px;height:11px;border-radius:50%;background:var(--pink);box-shadow:0 0 16px var(--pink)}
+  .brand .sep{color:var(--muted);font-weight:500}
+  .brand .sub{color:var(--muted);font-weight:600;letter-spacing:.02em}
+  .counter{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:600;font-size:13px;letter-spacing:.05em}
+  .counter b{color:var(--text)}
+
+  /* ---------- Slides ---------- */
+  .deck{position:fixed;inset:0}
+  .slide{
+    position:absolute;inset:0;
+    display:none;
+    padding:96px 6vw 92px;
+    flex-direction:column;justify-content:center;
+    opacity:0;transform:translateY(14px);
+    transition:opacity .5s ease,transform .5s ease;
+  }
+  .slide.active{display:flex;opacity:1;transform:none}
+  .wrap{width:100%;max-width:var(--maxw);margin:0 auto}
+
+  /* eyebrow / section tag */
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:10px;
+    font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:22px;
+  }
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--accent)}
+
+  h1{font-size:clamp(38px,6.4vw,84px);line-height:1.02;font-weight:900;letter-spacing:-.02em}
+  h2{font-size:clamp(30px,4.4vw,56px);line-height:1.05;font-weight:800;letter-spacing:-.02em}
+  .lead{font-size:clamp(17px,2vw,23px);color:var(--muted);font-weight:500;line-height:1.5;margin-top:22px;max-width:760px}
+  .acctext{color:var(--accent)}
+  .pink{color:var(--pink)}
+
+  /* ---------- Cover ---------- */
+  .cover h1{font-size:clamp(44px,8vw,108px)}
+  .cover .kicker{font-size:15px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:26px}
+  .cover .meta{display:flex;flex-wrap:wrap;gap:14px;margin-top:38px}
+  .pill{
+    display:inline-flex;align-items:center;gap:9px;
+    background:var(--card);border:1px solid var(--line);border-radius:999px;
+    padding:10px 18px;font-weight:600;font-size:15px;color:var(--text);
+  }
+  .pill .ic{font-size:17px}
+
+  /* ---------- Section divider ---------- */
+  .divider{align-items:flex-start}
+  .divider .bignum{
+    font-size:clamp(120px,26vw,360px);line-height:.8;font-weight:900;
+    color:transparent;-webkit-text-stroke:2px var(--accent);opacity:.9;letter-spacing:-.04em;
+  }
+  .divider h2{margin-top:8px}
+  .divider .lead{margin-top:18px}
+
+  /* ---------- Stat cards ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:40px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 22px}
+  .stat .n{font-size:clamp(30px,3.6vw,46px);font-weight:900;letter-spacing:-.02em}
+  .stat .l{margin-top:8px;color:var(--muted);font-weight:600;font-size:14px;line-height:1.35}
+  .stat.accent .n{color:var(--accent)}
+  .stat.warn .n{color:var(--red)}
+
+  /* ---------- Cast columns ---------- */
+  .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:36px}
+  .castcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 24px}
+  .castcard h3{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:16px}
+  .castcard ul{list-style:none}
+  .castcard li{padding:7px 0;font-weight:600;font-size:16.5px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+  .castcard li:last-child{border-bottom:0}
+  .castcard li span{color:var(--muted);font-weight:500;font-size:14px}
+
+  /* ---------- Content lists ---------- */
+  .twocol{display:grid;grid-template-columns:1.05fr .95fr;gap:46px;align-items:center;margin-top:30px}
+  ul.big{list-style:none;margin-top:10px}
+  ul.big li{
+    position:relative;padding:14px 0 14px 40px;font-size:clamp(17px,1.7vw,21px);
+    font-weight:600;line-height:1.4;border-bottom:1px solid var(--line);
+  }
+  ul.big li:last-child{border-bottom:0}
+  ul.big li::before{
+    content:"";position:absolute;left:6px;top:21px;width:14px;height:14px;border-radius:4px;
+    background:var(--accent);box-shadow:0 0 14px color-mix(in srgb,var(--accent) 60%,transparent);
+  }
+  ul.big li small{display:block;color:var(--muted);font-weight:500;font-size:14.5px;margin-top:4px}
+
+  .fix{
+    margin-top:22px;background:color-mix(in srgb,var(--accent) 12%,var(--card));
+    border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));
+    border-radius:14px;padding:18px 20px;font-size:17px;font-weight:600;line-height:1.45;
+  }
+  .fix b{color:var(--accent)}
+  .fix .tag{display:inline-block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:800;margin-right:8px}
+
+  .takeaway{
+    margin-top:30px;font-size:clamp(19px,2.2vw,27px);font-weight:800;line-height:1.3;letter-spacing:-.01em;
+  }
+  .takeaway .hl{color:var(--accent)}
+
+  /* ---------- Image drop zone ---------- */
+  .shot{
+    border:2px dashed var(--line);border-radius:18px;
+    background:
+      repeating-linear-gradient(45deg,transparent,transparent 12px,rgba(255,255,255,.012) 12px,rgba(255,255,255,.012) 24px),
+      var(--bg-soft);
+    min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+    color:var(--muted);text-align:center;padding:28px;
+  }
+  .shot.tall{min-height:430px}
+  .shot .ic{font-size:34px;opacity:.7}
+  .shot .lbl{font-weight:700;color:var(--text);font-size:15px}
+  .shot .fold{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:5px 12px;border-radius:7px;border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line))}
+  .shot.full{width:100%}
+  /* image system: <img> covers the frame; if the file is missing, onerror reveals the placeholder again */
+  .shot{position:relative;overflow:hidden}
+  .shotimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  .shot.has-img{border-style:solid;border-color:var(--line);background:var(--bg-soft)}
+  .shot.has-img .ph{display:none}
+  .shot:not(.has-img) .shotcap{display:none}
+  .ph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;position:relative;z-index:2}
+  .shotcap{
+    position:absolute;left:0;right:0;bottom:0;z-index:3;
+    padding:14px 16px;font-size:13px;font-weight:600;color:#fff;text-align:left;
+    background:linear-gradient(to top,rgba(0,0,0,.72),transparent);
+  }
+
+  /* chip row */
+  .chips{display:flex;flex-wrap:wrap;gap:11px;margin-top:30px}
+  .chip{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:12px 16px;font-weight:600;font-size:15.5px;display:flex;align-items:center;gap:9px}
+  .chip .e{font-size:18px}
+
+  /* playbook grid */
+  .pbgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:34px}
+  .pbcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;border-left:4px solid var(--accent)}
+  .pbcard h3{font-size:18px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+  .pbcard ul{list-style:none}
+  .pbcard li{position:relative;padding:5px 0 5px 18px;font-size:15px;font-weight:500;color:#d9d9e2;line-height:1.4}
+  .pbcard li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:800}
+
+  /* quote / origin */
+  .quotebox{margin-top:30px;display:grid;gap:18px}
+  .quote{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 28px;font-size:clamp(20px,2.4vw,30px);font-weight:700;line-height:1.35;border-left:5px solid var(--pink)}
+  .quote::before{content:"“";color:var(--pink);font-weight:900;margin-right:4px}
+
+  /* next steps */
+  .steps{display:grid;gap:14px;margin-top:30px}
+  .step{display:flex;gap:18px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 22px}
+  .step .num{font-size:24px;font-weight:900;color:var(--accent);min-width:42px}
+  .step .t{font-weight:700;font-size:18px}
+  .step .d{color:var(--muted);font-weight:500;font-size:14.5px;margin-top:3px}
+
+  /* ---------- Nav controls ---------- */
+  .arrow{
+    position:fixed;top:0;bottom:0;width:11vw;max-width:130px;z-index:40;
+    background:transparent;border:0;cursor:pointer;color:transparent;
+    display:flex;align-items:center;justify-content:center;transition:.2s;
+  }
+  .arrow:hover{color:var(--muted);background:linear-gradient(to var(--dir),rgba(255,255,255,.04),transparent)}
+  .arrow.prev{left:0;--dir:right}
+  .arrow.next{right:0;--dir:left}
+  .arrow svg{width:30px;height:30px}
+  .progress{
+    position:fixed;left:0;right:0;bottom:0;z-index:45;
+    display:flex;gap:5px;padding:16px 34px;align-items:center;
+  }
+  .seg{flex:1;height:4px;border-radius:3px;background:var(--line);cursor:pointer;transition:.25s}
+  .seg.on{background:var(--accent)}
+  .seg.section-g.on{background:var(--green)}
+  .seg.section-a.on{background:var(--amber)}
+  .seg.section-r.on{background:var(--red)}
+  .seg.section-t.on{background:var(--teal)}
+  .hint{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:46;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:.08em;opacity:.7;pointer-events:none;transition:opacity .4s}
+  .hint.hide{opacity:0}
+
+  @media (max-width:820px){
+    .twocol{grid-template-columns:1fr;gap:26px}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .cols3{grid-template-columns:1fr}
+    .pbgrid{grid-template-columns:1fr}
+    .slide{padding:84px 7vw 80px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .slide{transition:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- top chrome -->
+<div class="topbar">
+  <div class="brand"><span class="dot"></span>HELLO NANCY <span class="sep">·</span><span class="sub">Miami Swim Week Recap</span></div>
+  <div class="counter"><b id="cur">01</b> / <span id="tot">23</span></div>
+</div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 · COVER -->
+  <section class="slide active cover" data-sec="t">
+    <div class="wrap">
+      <div class="kicker">Event Recap &amp; Playbook</div>
+      <h1>Miami<br><span class="pink">Swim Week</span></h1>
+      <div class="meta">
+        <span class="pill"><span class="ic">📍</span> Surfcomber Hotel, Miami</span>
+        <span class="pill"><span class="ic">📅</span> May 28–30, 2026</span>
+        <span class="pill"><span class="ic">🌧️</span> 3-day event · frequent rain</span>
+        <span class="pill"><span class="ic">👥</span> Crystal · Britt · Momo · Rahul</span>
+      </div>
+      <p class="lead">What we did, what worked, what to kill — built as the playbook for every event after this one.</p>
+    </div>
+  </section>
+
+  <!-- 2 · THE REFRAME -->
+  <section class="slide" data-sec="t">
+    <div class="wrap">
+      <div class="eyebrow">The framework</div>
+      <h2>We don't set out to just <span class="acctext">“run an event.”</span></h2>
+      <p class="lead">From day one the framework is one thing: build a <b style="color:#fff">great event</b> that also captures a <b style="color:#fff">ton of content</b> — then drive that content to a <b style="color:#fff">$1 CPM</b>.</p>
+      <div class="chips">
+        <span class="chip"><span class="e">🎉</span> A great event</span>
+        <span class="chip"><span class="e">🎬</span> …that captures tons of content</span>
+        <span class="chip"><span class="e">💸</span> Drive it to a $1 CPM</span>
+      </div>
+      <p class="takeaway">Everything else is just <span class="hl">noise.</span></p>
+    </div>
+  </section>
+
+  <!-- 3 · CONTEXT -->
+  <section class="slide" data-sec="t">
+    <div class="wrap">
+      <div class="eyebrow">Context · the setup</div>
+      <h2>What we came in with</h2>
+      <p class="lead">A concept, a full crew, and our models — the whole activation was built around one line:</p>
+      <div class="quote" style="border-left-color:var(--teal)">Your grandma owns one.</div>
+      <p class="lead" style="margin-top:18px">Grandma Lori, so out there — handing out product and making noise. The booth, the fish tank, the popsicles all laddered up to that.</p>
+    </div>
+  </section>
+
+  <!-- 4 · THE CAST -->
+  <section class="slide" data-sec="t">
+    <div class="wrap">
+      <div class="eyebrow">The cast</div>
+      <h2>Who was on the ground</h2>
+      <div class="cols3">
+        <div class="castcard">
+          <h3>Team</h3>
+          <ul>
+            <li>Crystal</li>
+            <li>Britt</li>
+            <li>Momo</li>
+            <li>Rahul</li>
+          </ul>
+        </div>
+        <div class="castcard">
+          <h3>Crew</h3>
+          <ul>
+            <li>Nick &amp; Ale <span>Videographers</span></li>
+            <li>Susan <span>Content</span></li>
+            <li>Megan <span>Creator</span></li>
+            <li>Lacee <span>Creator</span></li>
+          </ul>
+        </div>
+        <div class="castcard">
+          <h3>Models</h3>
+          <ul>
+            <li>Lori <span>The Grandma 👵</span></li>
+            <li>Juan <span>The Hot Guy 🔥</span></li>
+            <li>Marion <span>The Hot Girl ✨</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · DIVIDER GREAT -->
+  <section class="slide divider" data-sec="g">
+    <div class="wrap">
+      <div class="bignum">01</div>
+      <div class="eyebrow">Section one</div>
+      <h2>GREAT — do it again ✅</h2>
+      <p class="lead">The stuff that worked. Repeat it by default at every event.</p>
+    </div>
+  </section>
+
+  <!-- 6 · GREAT popsicles -->
+  <section class="slide" data-sec="g">
+    <div class="wrap">
+      <div class="eyebrow">Great · the magnet</div>
+      <div class="twocol">
+        <div>
+          <h2>🍦 The popsicle giveaway</h2>
+          <ul class="big">
+            <li>Miami heat made it a magnet — people flooded the booth<small>~$7/popsicle from a local vendor. Pricey, but it pulled crowds in front of the product.</small></li>
+            <li>Stickers + quotes made people laugh</li>
+            <li>Shy to post a sex toy → happy to post a popsicle<small>The branded popsicle was a clever Trojan horse.</small></li>
+          </ul>
+          <p class="takeaway">People just <span class="hl">love free food.</span> 🙌</p>
+        </div>
+        <div class="shot tall has-img">
+          <img class="shotimg" src="img/popsicle.jpg" alt="Nancy-branded popsicle poolside at the Surfcomber"
+               onerror="this.closest('.shot').classList.remove('has-img');this.remove()">
+          <div class="shotcap">“at my age, i know exactly what i like.” — Nancy</div>
+          <div class="ph">
+            <div class="ic">📷</div>
+            <div class="lbl">Save your photo as <b>img/popsicle.jpg</b></div>
+            <div class="fold">Shade ▸ HelloNancy_Miami_Photos</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · GREAT fish tank -->
+  <section class="slide" data-sec="g">
+    <div class="wrap">
+      <div class="eyebrow">Great · the booth</div>
+      <div class="twocol">
+        <div class="shot tall has-img">
+          <video class="shotimg" src="media/fishtank.mp4" poster="img/fishtank.jpg" muted loop autoplay playsinline controls preload="metadata"></video>
+        </div>
+        <div>
+          <h2>🐠 The fish tank stopped traffic</h2>
+          <ul class="big">
+            <li>Lem (squirting) as the main image inside the tank</li>
+            <li>Got laughs + made people <em>get it</em><small>Without it, passers-by don't understand and just walk past.</small></li>
+            <li>A visual hook does the explaining for you</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · GREAT creators + friend engine -->
+  <section class="slide" data-sec="g">
+    <div class="wrap">
+      <div class="eyebrow">Great · the people engine</div>
+      <h2>🤝 Bring friends, not strangers</h2>
+      <ul class="big">
+        <li>Megan &amp; Lacee + their husbands → couple / relationship content<small>They helped at the booth more than anyone, shot constantly, and we got real footage variety.</small></li>
+        <li>Nick brought his friend Juan as the hot guy → natural, better chemistry</li>
+        <li>Susan = critical extra shooter, doubled our capture</li>
+      </ul>
+      <p class="takeaway">Biggest realization: bringing a <span class="hl">friend</span> to a shoot beats hiring cold — and the relationship compounds into a community.</p>
+    </div>
+  </section>
+
+  <!-- 9 · GREAT mechanics -->
+  <section class="slide" data-sec="g">
+    <div class="wrap">
+      <div class="eyebrow">Great · the mechanics</div>
+      <h2>What pulled people in</h2>
+      <div class="chips">
+        <span class="chip"><span class="e">🎁</span> Gifting product = biggest booth surge of the day</span>
+        <span class="chip"><span class="e">🎡</span> Spin-the-wheel + follow (low friction)</span>
+        <span class="chip"><span class="e">⚡</span> Last-minute calls paid off</span>
+        <span class="chip"><span class="e">😄</span> Team vibe = good energy = good content</span>
+      </div>
+      <p class="takeaway">People <span class="hl">love free stuff</span> — gifting is a reliable crowd switch.</p>
+    </div>
+  </section>
+
+  <!-- 10 · DIVIDER GOOD -->
+  <section class="slide divider" data-sec="a">
+    <div class="wrap">
+      <div class="bignum">02</div>
+      <div class="eyebrow">Section two</div>
+      <h2>GOOD — could be better ⚠️</h2>
+      <p class="lead">Right ideas, weak execution. Keep them — fix how we run them.</p>
+    </div>
+  </section>
+
+  <!-- 11 · GOOD grandma -->
+  <section class="slide" data-sec="a">
+    <div class="wrap">
+      <div class="eyebrow">Could be better · the concept</div>
+      <div class="twocol">
+        <div>
+          <h2>👵 “Grandma owns one”</h2>
+          <ul class="big">
+            <li>Strong idea — but very weak on site, basically nothing happening</li>
+            <li>Banner was hard to read; booth setup had to change<small>No one really saw the lemon inflatable or the concept. Mockup ≠ reality on the day.</small></li>
+            <li>Reaction was just “oh, okay” — not what we wanted</li>
+          </ul>
+          <div class="fix"><span class="tag">Fix</span> Grandma must be <b>loud + aggressive</b> at all times. Run it as a <b>“Nancy Circus”</b> act — give it traffic, volume, and time.</div>
+        </div>
+        <div class="shot tall has-img">
+          <video class="shotimg" src="media/grandma.mp4" poster="img/grandma.jpg" muted loop autoplay playsinline controls preload="metadata"></video>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 · GOOD branding -->
+  <section class="slide" data-sec="a">
+    <div class="wrap">
+      <div class="eyebrow">Could be better · brand clarity</div>
+      <h2>🍦 The popsicle's blind spot</h2>
+      <ul class="big">
+        <li>The quote wasn't “out there” enough — many never read it</li>
+        <li>People remove the wrapper → Nancy disappears, no photo<small>The branding lived on the thing people throw away.</small></li>
+        <li>Many thought we were a <em>popsicle brand</em>, not a toy brand</li>
+      </ul>
+      <div class="fix"><span class="tag">Fix</span> Put Nancy branding <b>on the food itself</b> (branded molds — e.g. plug-shaped popsicles). Make “what we actually do” impossible to miss.</div>
+    </div>
+  </section>
+
+  <!-- 13 · GOOD product + creator reach -->
+  <section class="slide" data-sec="a">
+    <div class="wrap">
+      <div class="eyebrow">Could be better · the assets</div>
+      <h2>We left content on the table</h2>
+      <ul class="big">
+        <li><b>Forgot the product launches.</b> No snack pack; plushie &amp; Every Mood under-featured<small>Treated as “nice to have” instead of the point.</small></li>
+        <li><b>Creator reach unused.</b> They feared posting on their main accounts (worried views would tank)</li>
+      </ul>
+      <div class="fix"><span class="tag">Fix</span> Deliberate <b>shot list per launch</b> · book <b>separate shoot time</b> with creators · offer a <b>new/separate profile</b> · lock <b>deliverables</b> for anyone paid or in-kind.</div>
+    </div>
+  </section>
+
+  <!-- 14 · DIVIDER BAD -->
+  <section class="slide divider" data-sec="r">
+    <div class="wrap">
+      <div class="bignum">03</div>
+      <div class="eyebrow">Section three</div>
+      <h2>BAD — never again 🚫</h2>
+      <p class="lead">Scrap these. They cost us and they don't come back.</p>
+    </div>
+  </section>
+
+  <!-- 15 · BAD posting + reaction -->
+  <section class="slide" data-sec="r">
+    <div class="wrap">
+      <div class="eyebrow">Never again · the capture gap</div>
+      <h2>⏰ Nobody posted in real time</h2>
+      <ul class="big">
+        <li>Only started after Day 1 when Rahul asked “why aren't we posting?”<small>Too late — we missed the live moment and could only post after the fact.</small></li>
+        <li>No reaction content captured — no live videos of people reacting at the booth</li>
+      </ul>
+      <div class="fix"><span class="tag">Fix</span> Same-day pipeline: <b>shoot → upload → organize → post the same day.</b> Some posts straight from the phone. Run a <b>livestream</b>. Assign one person to live reactions.</div>
+    </div>
+  </section>
+
+  <!-- 16 · BAD editor + no pipeline -->
+  <section class="slide" data-sec="r">
+    <div class="wrap">
+      <div class="eyebrow">Never again · outsourcing blind</div>
+      <h2>🧨 We outsourced blind, with no pipeline</h2>
+      <ul class="big">
+        <li><b>Cold viral editor failed.</b> Didn't get the brand; footage was an unorganized pile of clips/scripts → confusing for anyone not on the shoot → he quit</li>
+        <li><b>No editing/posting pipeline set up beforehand.</b> No standby editor; didn't line up Content Forge<small>So no one posted until massively after the fact. Best post ~70k, everything else far lower — we grew followers but not virally.</small></li>
+      </ul>
+      <div class="fix"><span class="tag">Fix</span> Never hand over raw chaos — <b>brief + organize first</b>, and line up the editor/pipeline <b>before</b> the event.</div>
+    </div>
+  </section>
+
+  <!-- 17 · BAD organizer + venue -->
+  <section class="slide" data-sec="r">
+    <div class="wrap">
+      <div class="eyebrow">Never again · relying on the organizer</div>
+      <h2>🏢 We relied on the organizer</h2>
+      <ul class="big">
+        <li><b>They committed nothing.</b> Miami Swim Week only said “maybe we'll share on socials” — no committed creator posting</li>
+        <li><b>Unresponsive on logistics.</b> We didn't even know the booth was on the <b>2nd floor</b> with very low visibility<small>The organizer wasn't getting back to us, and we didn't chase it.</small></li>
+      </ul>
+      <div class="fix"><span class="tag">Fix</span> Require <b>committed posting</b> · chase &amp; <b>confirm booth placement</b> ahead of the day · since we're not yet great at virality, <b>anchor influencer views &amp; content ourselves</b> — don't rely on a partner's “maybe.”</div>
+    </div>
+  </section>
+
+  <!-- 18 · BAD spend -->
+  <section class="slide" data-sec="r">
+    <div class="wrap">
+      <div class="eyebrow">Never again · the money</div>
+      <h2>💸 Open-ended spend, no framework</h2>
+      <ul class="big">
+        <li>We're fine spending <em>if</em> CPM ≈ $1 — but we set no ceiling → overspent</li>
+        <li>“$1 CPM” isn't understood by the team — it only works if we <b>maximize creators</b><small>We can't expect the team to intuit it. We have to engineer the creativity and incentives.</small></li>
+      </ul>
+      <div class="fix"><span class="tag">Fix</span> Set a <b>spend ceiling per event.</b> Build and <b>control the influencer + clipper engine</b> — that's the lever that makes the CPM math real.</div>
+    </div>
+  </section>
+
+  <!-- 18 · DIVIDER PLAYBOOK -->
+  <section class="slide divider" data-sec="t">
+    <div class="wrap">
+      <div class="bignum">→</div>
+      <div class="eyebrow">The system</div>
+      <h2>Forward playbook 🚀</h2>
+      <p class="lead">The repeatable checklist for London and every event after.</p>
+    </div>
+  </section>
+
+  <!-- 19 · PLAYBOOK process + content -->
+  <section class="slide" data-sec="t">
+    <div class="wrap">
+      <div class="eyebrow">Playbook · run it tight</div>
+      <h2>Process &amp; content engine</h2>
+      <div class="pbgrid">
+        <div class="pbcard">
+          <h3>🗂️ Process &amp; planning</h3>
+          <ul>
+            <li>Start from goals → context → keep / fix / scrap</li>
+            <li>Aggressive checklist + project management</li>
+            <li>Invite 1–2 weeks out with RSVP-to-attend</li>
+            <li>Lock deliverables for any creator (paid or in-kind)</li>
+          </ul>
+        </div>
+        <div class="pbcard">
+          <h3>🎬 Content engine</h3>
+          <ul>
+            <li>Same-day shoot → upload → organize → post</li>
+            <li>Some posts straight from the phone</li>
+            <li>Run a livestream</li>
+            <li>Capture live reactions on purpose</li>
+            <li>Showcase what works (popsicles) — fix the branding-on-food gap</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 20 · PLAYBOOK creators + circus -->
+  <section class="slide" data-sec="t">
+    <div class="wrap">
+      <div class="eyebrow">Playbook · the multipliers</div>
+      <h2>Creators &amp; the Nancy Circus</h2>
+      <div class="pbgrid">
+        <div class="pbcard">
+          <h3>🌟 Creators / partnerships</h3>
+          <ul>
+            <li>Keep inviting creators (~$1k) — build community</li>
+            <li>Offer separate profiles to protect their views</li>
+            <li>Activate IM8, Dr. Tina — “what do we have?”</li>
+            <li>Partner with events whose creators <em>actually post</em><span style="color:var(--muted)"> — e.g. Snowflake Gelato normally gets 3–6k, but bring food creators and posts hit 30–40k at events</span></li>
+            <li>Or partner with brands that keep <b>influencers on retainer</b> — they bring their roster</li>
+          </ul>
+        </div>
+        <div class="pbcard">
+          <h3>🎪 On-site spectacle</h3>
+          <ul>
+            <li>Paid actors on shift — dancing 4 hrs, making noise <em>irrespective of the crowd</em> (critical)</li>
+            <li>Colored sparkly water (pink/yellow glitter) for the lamps &amp; toys</li>
+            <li>Branded food (plug-shaped popsicles)</li>
+            <li>Test “share a story → get the food” &amp; measure who posts</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 21 · PLAYBOOK merch/ops -->
+  <section class="slide" data-sec="t">
+    <div class="wrap">
+      <div class="eyebrow">Playbook · merch &amp; ops</div>
+      <h2>The free-advertising layer</h2>
+      <div class="chips">
+        <span class="chip"><span class="e">👜</span> Big tote bags = walking ads (the Alo play)</span>
+        <span class="chip"><span class="e">🎁</span> Cost-analyze gifting volume</span>
+        <span class="chip"><span class="e">👕</span> Merch + order prep, T-shirts</span>
+        <span class="chip"><span class="e">📲</span> Make products buyable on-site (scan &amp; pay)</span>
+        <span class="chip"><span class="e">🎥</span> Hire local videography per city (stay hands-on)</span>
+      </div>
+      <p class="takeaway">A bag people <span class="hl">want to carry</span> is free marketing from the booth to the taxi to the next party.</p>
+    </div>
+  </section>
+
+  <!-- 22 · NEXT STEPS -->
+  <section class="slide" data-sec="t">
+    <div class="wrap">
+      <div class="eyebrow">Before London</div>
+      <h2>3 things to lock now</h2>
+      <div class="steps">
+        <div class="step"><div class="num">01</div><div><div class="t">Build the same-day content pipeline</div><div class="d">Named owner for shoot → upload → organize → post. This is the #1 fix.</div></div></div>
+        <div class="step"><div class="num">02</div><div><div class="t">Set the spend ceiling + creator incentive model</div><div class="d">Define the per-event cap and how we pay creators/clippers to hit sub-$1 CPM.</div></div></div>
+        <div class="step"><div class="num">03</div><div><div class="t">Lock partners who bring posting creators</div><div class="d">Written posting commitments. Activate IM8 / Dr. Tina and event collabs.</div></div></div>
+      </div>
+      <p class="takeaway" style="margin-top:26px">Run it like a <span class="hl">content engine</span> — and bring the <span class="hl">Nancy Circus</span> energy (everyone playing a role, making noise their own way) when the event calls for it. 🎪</p>
+    </div>
+  </section>
+
+</div>
+
+<!-- nav -->
+<button class="arrow prev" id="prev" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+<button class="arrow next" id="next" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+
+<div class="progress" id="progress"></div>
+<div class="hint" id="hint">← → or click edges to navigate</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  const secMap={g:'section-g',a:'section-a',r:'section-r',t:'section-t'};
+  const accentMap={g:'var(--green)',a:'var(--amber)',r:'var(--red)',t:'var(--teal)'};
+  let i=0;
+
+  // build progress segments
+  const prog=document.getElementById('progress');
+  slides.forEach((s,idx)=>{
+    const seg=document.createElement('div');
+    seg.className='seg '+(secMap[s.dataset.sec]||'');
+    seg.addEventListener('click',()=>go(idx));
+    prog.appendChild(seg);
+  });
+  const segs=[...prog.children];
+  document.getElementById('tot').textContent=String(slides.length).padStart(2,'0');
+
+  function go(n){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach((s,idx)=>s.classList.toggle('active',idx===i));
+    segs.forEach((s,idx)=>s.classList.toggle('on',idx<=i));
+    // recolor accent to active section
+    const sec=slides[i].dataset.sec;
+    document.documentElement.style.setProperty('--accent',accentMap[sec]||'var(--teal)');
+    document.getElementById('cur').textContent=String(i+1).padStart(2,'0');
+    // play the video on the active slide, pause the rest
+    slides.forEach((s,idx)=>{
+      const v=s.querySelector('video');
+      if(!v)return;
+      if(idx===i){v.play().catch(()=>{});}else{v.pause();}
+    });
+  }
+  function next(){go(i+1)}
+  function prev(){go(i-1)}
+
+  document.getElementById('next').addEventListener('click',next);
+  document.getElementById('prev').addEventListener('click',prev);
+  document.addEventListener('keydown',e=>{
+    if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();next()}
+    else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();prev()}
+    else if(e.key==='Home'){go(0)}
+    else if(e.key==='End'){go(slides.length-1)}
+  });
+  // hide hint after first interaction
+  const hint=document.getElementById('hint');
+  ['click','keydown'].forEach(ev=>document.addEventListener(ev,()=>hint.classList.add('hide'),{once:true}));
+  setTimeout(()=>hint.classList.add('hide'),5000);
+
+  // touch swipe
+  let tx=0;
+  document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+  document.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-tx;
+    if(Math.abs(dx)>50){dx<0?next():prev()}
+  },{passive:true});
+
+  go(0);
+</script>
+</body>
+</html>
